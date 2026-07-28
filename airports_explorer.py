@@ -2,7 +2,7 @@
 Name:       Ziming Shen
 CS602:      Summer 2026, Monday 6:00-9:30 pm, Smith 203 (Prof. Anqi Xu)
 Data:       Airports around the World (airport-codes.csv + wikipedia-iso-country-codes.csv)
-URL:
+URL:        https://ziming-airports.streamlit.app/
 
 Description:
 
@@ -154,6 +154,43 @@ def tidy_axes(ax, keep_left=True, keep_bottom=True):
     ax.tick_params(length=0)
 
 
+def drop_impossible_records(airports):
+    """[DA1] Remove records that cannot describe a real airfield.
+
+    [PY2] Returns two values: the surviving rows and how many were dropped, so the
+    page can tell the reader what was removed instead of quietly shrinking.
+
+    OurAirports is crowd-sourced, and this snapshot carries two rows that cannot
+    be real. XXZ, named "Modi", sits at 89.9998 N / 179.9999 E, which is the
+    North Pole, while its municipality column says California and its elevation
+    says 29,977 ft - higher than the summit of Everest at 29,032 ft. SA-0009 is
+    not an airport at all but an advertisement for personal loans, filed as a
+    large_airport at 90 N / 90 E.
+
+    The temptation is to delete those two idents by name. That would be choosing
+    the data I like rather than cleaning it, and it would fix nothing if a third
+    bad row appeared. So this applies two physical tests instead, and the two
+    known rows simply happen to fail them.
+
+    The northern test is deliberately one-sided. The geographic North Pole is
+    floating sea ice with no airfield on it, but the South Pole sits on the
+    Antarctic ice sheet and genuinely has one - NZSP, the runway at Amundsen-Scott
+    station, at latitude -90. A symmetric test would throw away a real airport.
+
+    The data files themselves are left exactly as supplied; this filtering happens
+    only in memory, so the CSV submitted with this project still matches the one
+    handed out.
+    """
+    # No airfield exists at the North Pole. The South Pole is deliberately spared.
+    at_north_pole = airports["lat"] > 89.9
+    # Siachen Glacier AFS at 22,000 ft is the highest helipad in the world, so
+    # anything above that is a transcription error rather than an airfield.
+    above_the_highest_helipad = airports["elevation_ft"] > 22000
+
+    impossible = at_north_pole | above_the_highest_helipad
+    return airports[~impossible], int(impossible.sum())
+
+
 def name_the_leftovers(airports):
     """Name every country the Wikipedia ISO table failed to cover, using pycountry.
 
@@ -227,7 +264,10 @@ def load_data():
 
     # Rows with no usable position cannot be mapped or measured.
     airports = airports.dropna(subset=["lat", "lon"])
-    return airports
+
+    # [PY2] The second cleaning pass hands back both the data and a count.
+    airports, dropped = drop_impossible_records(airports)
+    return airports, dropped
 
 
 # [PY3] Returns a value and is called from five different places: the country page,
@@ -810,7 +850,7 @@ def main():
     page_styles()
     style_charts()
 
-    data = load_data()
+    data, dropped = load_data()
 
     st.sidebar.markdown("## ✈️ Airports")
     page = st.sidebar.radio(
@@ -838,9 +878,16 @@ def main():
     st.sidebar.divider()
     st.sidebar.caption(
         f"{len(data):,} airfields from OurAirports, joined to the Wikipedia "
-        "ISO country list. Built with Streamlit, pandas, NumPy, Matplotlib "
-        "and PyDeck."
+        "ISO country list. Built with Streamlit, pandas, NumPy, Matplotlib, "
+        "Plotly, PyDeck and pycountry."
     )
+    if dropped:
+        st.sidebar.caption(
+            f"{dropped} rows were set aside as physically impossible - an "
+            "airfield at the North Pole, and an advertisement filed as a large "
+            "airport. The source CSV is unaltered; the filtering happens in "
+            "memory. See drop_impossible_records() for the two tests used."
+        )
 
 
 main()
