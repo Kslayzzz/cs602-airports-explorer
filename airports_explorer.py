@@ -6,8 +6,9 @@ URL:        https://ziming-airports.streamlit.app/
 
 Description:
 
-This program is an interactive explorer for the 57,421 airports in the OurAirports
-dataset. It answers three questions the user controls from the sidebar: which
+This program is an interactive explorer for the OurAirports dataset, which lists
+57,421 airfields worldwide. Two of those rows describe places that cannot exist
+and are set aside on load, leaving 57,419; see drop_impossible_records(). It answers three questions the user controls from the sidebar: which
 countries have the most airports of a chosen type, how airport elevation is
 distributed inside a chosen continent, and where a chosen country's airports
 actually sit on the map. The app joins the airport table to the Wikipedia ISO
