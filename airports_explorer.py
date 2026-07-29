@@ -290,8 +290,6 @@ def filter_airports(df, continent=None, country=None, types=None, elevation_rang
     return result
 
 
-# [PY1] Two parameters, one with a default value. Called once with the default on
-# the overview page and once with an explicit count on the country page.
 # [DA2] Sort in descending order. [DA3] Take the largest values of a column.
 def top_countries(df, count=10):
     """Return the countries holding the most airports, largest first."""
@@ -310,6 +308,10 @@ def elevation_extremes(df):
     return highest, lowest, measured["elevation_ft"].mean()
 
 
+# [PY1] Three parameters, the last with a default value, and it is genuinely called
+# both ways: the Overview page calls draw_top_countries(data, 10) and lets highlight
+# default to None, while the country page passes highlight=chosen_country so that
+# one bar comes out in the accent colour.
 def draw_top_countries(df, count, highlight=None):
     """[VIZ1] Horizontal bar chart of the countries with the most airports."""
     tally = top_countries(df, count)
