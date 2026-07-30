@@ -578,7 +578,7 @@ def page_overview(data):
 
     left, right = st.columns([3, 2], gap="large")
     with left:
-        # [PY1] first call, using the default count of 10.
+        # [PY1] first call: highlight is left out, so it takes its default of None.
         st.pyplot(draw_top_countries(data, 10), width="stretch")
     with right:
         st.markdown("#### Why the United States runs away with it")
@@ -685,7 +685,7 @@ def page_country(data):
             )
 
     with rank_tab:
-        # [PY1] second call, passing the count instead of taking the default.
+        # [PY1] second call: highlight is passed explicitly instead of taking the default.
         st.pyplot(
             draw_top_countries(filter_airports(data, types=chosen_types), 15,
                                highlight=chosen_country),
