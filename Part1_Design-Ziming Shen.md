@@ -1,4 +1,4 @@
-# CS 602 Final Project — Part 1: Design
+#  DESIGN.md
 
 **Name:** Ziming Shen
 **Data set:** Airports around the World (`airport-codes.csv`, joined to `wikipedia-iso-country-codes.csv`)
